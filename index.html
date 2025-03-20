@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet" />
+    <title>%VITE_APP_TITLE% | %VITE_APP_DESCRIPTION%</title>
+    <meta name="description" content="%VITE_APP_DESCRIPTION%" />
+
+    <!-- Open Graph / twitter -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="%VITE_APP_TITLE%" />
+    <meta property="og:url" content="%VITE_APP_PERMALINK%" />
+    <meta property="og:description" content="%VITE_APP_DESCRIPTION%" />
+    <meta property="og:image" content="/cover.jpg" />
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="%VITE_APP_PERMALINK%" />
+    <meta property="twitter:title" content="%VITE_APP_TITLE%" />
+    <meta property="twitter:description" content="%VITE_APP_DESCRIPTION%" />
+    <meta property="twitter:image" content="/cover.jpg" />
+    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_APP_GTAG_ID%"></script>
+    <script>
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      if (window.location.hostname !== 'localhost') {
+        window.dataLayer = window.dataLayer || [];
+        gtag('js', new Date());
+        gtag('config', '%VITE_APP_GTAG_ID%');
+      }
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

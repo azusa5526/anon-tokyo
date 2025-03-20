@@ -1,0 +1,92 @@
+@import 'tailwindcss';
+
+:root {
+  font-family:
+    'Noto Sans TC',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+}
+
+body,
+html {
+  scrollbar-width: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+@theme {
+  --color-mujica: #881144;
+  --color-error: #b00020;
+  --color-info: #2196f3;
+  --color-success: #4caf50;
+  --color-warning: #fb8c00;
+  --font-noto-sans-tc: Noto Sans TC;
+}
+
+.hide-scroll-bar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scroll-bar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* 如果 driver.js 正在導覽
+則包含 data-driver 屬性的元素及其後代停用事件 */
+body.driver-active [data-driver],
+body.driver-active [data-driver] * {
+  pointer-events: none !important;
+}
+
+.driver-popover.driverjs-theme {
+  @apply w-full px-5 py-4;
+}
+
+.driver-popover.driverjs-theme .driver-popover-title {
+  @apply text-xl;
+}
+
+.driver-popover.driverjs-theme .driver-popover-footer {
+  @apply mt-5;
+}
+
+.driver-popover.driverjs-theme .driver-popover-description,
+.driver-popover.driverjs-theme .driver-popover-progress-text {
+  @apply text-base;
+}
+
+.driver-popover.driverjs-theme .driver-popover-title,
+.driver-popover.driverjs-theme .driver-popover-description,
+.driver-popover.driverjs-theme .driver-popover-progress-text {
+  @apply text-neutral-700;
+}
+
+.driver-popover.driverjs-theme .driver-popover-navigation-btns {
+  @apply gap-x-1.5;
+}
+
+.driver-popover.driverjs-theme .driver-popover-close-btn {
+  @apply top-1 right-1 size-9 text-2xl text-neutral-400;
+}
+
+.driver-popover.driverjs-theme .driver-popover-prev-btn,
+.driver-popover.driverjs-theme .driver-popover-next-btn {
+  @apply rounded border-none px-4 py-1.5 text-base;
+  text-shadow: none;
+}
+
+.driver-popover.driverjs-theme .driver-popover-next-btn {
+  @apply bg-mujica text-white hover:opacity-80;
+}
+
+.driver-popover.driverjs-theme .driver-popover-prev-btn {
+  @apply bg-neutral-500 text-white hover:opacity-80;
+}
+
+.driver-popover.driverjs-theme .driver-popover-close-btn:hover {
+  @apply text-neutral-600;
+}
