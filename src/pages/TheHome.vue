@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen w-full flex-col overflow-hidden bg-neutral-800">
+  <div class="flex h-dvh w-full flex-col overflow-hidden bg-neutral-800">
     <div class="bg-mujica flex h-14 items-center justify-between px-3 text-white">
       <div class="relative mr-3 max-w-72 grow" data-driver="search">
         <input

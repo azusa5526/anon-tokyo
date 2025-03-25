@@ -1,141 +1,124 @@
 <template>
-  <div class="flex h-screen w-full flex-col overflow-hidden bg-neutral-900 select-none">
-    <div class="bg-mujica flex h-14 w-full shrink-0 items-center justify-end gap-x-3 px-3">
-      <button
-        @click="clearDialogOpen = true"
-        class="grid size-10 cursor-pointer place-items-center rounded bg-white text-xl font-bold text-red-600 transition-all hover:scale-105 hover:opacity-85"
-        data-driver="deleteBtn"
-      >
-        <icon-ic-baseline-delete-forever class="size-7" />
-      </button>
+  <div class="flex h-dvh w-full flex-col overflow-hidden bg-neutral-900 select-none">
+    <div class="bg-mujica flex h-14 w-full shrink-0 items-center justify-between px-3 lg:justify-end">
+      <div v-if="!breakpointStore.isGreaterThanBreakpoint">
+        <button
+          @click="isDrawerOpen = !isDrawerOpen"
+          class="text-mujica grid size-10 cursor-pointer place-items-center rounded bg-white text-xl font-bold transition-all hover:scale-105 hover:opacity-85"
+          data-driver="mediaPoolBtn"
+        >
+          <icon-ic-baseline-menu class="size-6" />
+        </button>
+        <VDrawer v-model:model-value="isDrawerOpen" :mask="!isDriverActive">
+          <MediaPool
+            class="bg-neutral-700 p-3"
+            v-model="workStore.selectedFrameGroups"
+            @delete="onDelFrameGroupClick"
+            @item-click="onImageClick"
+            @drag-change="onDragChange"
+          />
+        </VDrawer>
+      </div>
 
-      <button
-        @click="downloadDialogOpen = true"
-        class="text-mujica grid size-10 cursor-pointer place-items-center rounded bg-white text-xl font-bold transition-all hover:scale-105 hover:opacity-85"
-        data-driver="downloadBtn"
-      >
-        <icon-ic-baseline-download class="size-7" />
-      </button>
+      <div class="flex flex-nowrap gap-x-3">
+        <button
+          @click="clearDialogOpen = true"
+          class="grid size-10 cursor-pointer place-items-center rounded bg-white text-xl font-bold text-red-600 transition-all hover:scale-105 hover:opacity-85"
+          data-driver="deleteBtn"
+        >
+          <icon-ic-baseline-delete-forever class="size-7" />
+        </button>
 
-      <button
-        @click="startDriver"
-        class="text-mujica grid size-10 cursor-pointer place-items-center rounded bg-white p-1 text-xl font-bold transition-all hover:scale-105 hover:opacity-85"
-      >
-        <icon-ic-baseline-question-mark class="size-7" />
-      </button>
+        <button
+          @click="downloadDialogOpen = true"
+          class="text-mujica grid size-10 cursor-pointer place-items-center rounded bg-white text-xl font-bold transition-all hover:scale-105 hover:opacity-85"
+          data-driver="downloadBtn"
+        >
+          <icon-ic-baseline-download class="size-7" />
+        </button>
 
-      <button
-        @click="onBackClick"
-        class="text-mujica grid size-10 cursor-pointer place-items-center rounded bg-white text-xl font-bold transition-all hover:scale-105 hover:opacity-85"
-        data-driver="returnBtn"
-      >
-        <icon-ic-baseline-keyboard-return class="size-7" />
-      </button>
+        <button
+          @click="startDriver"
+          class="text-mujica grid size-10 cursor-pointer place-items-center rounded bg-white p-1 text-xl font-bold transition-all hover:scale-105 hover:opacity-85"
+        >
+          <icon-ic-baseline-question-mark class="size-7" />
+        </button>
+
+        <button
+          @click="onBackClick"
+          class="text-mujica grid size-10 cursor-pointer place-items-center rounded bg-white text-xl font-bold transition-all hover:scale-105 hover:opacity-85"
+          data-driver="returnBtn"
+        >
+          <icon-ic-baseline-keyboard-return class="size-7" />
+        </button>
+      </div>
     </div>
 
     <div class="flex min-h-0 grow p-3">
-      <div class="mr-3 flex w-82 shrink-0 flex-col bg-neutral-700 p-3" data-driver="frames">
-        <draggable
-          :animation="300"
-          item-key="addTime"
-          class="hide-scroll-bar flex h-full flex-col gap-y-2 overflow-y-scroll"
+      <div
+        v-if="breakpointStore.isGreaterThanBreakpoint"
+        class="mr-3 flex w-82 shrink-0 flex-col bg-neutral-700 p-3"
+        data-driver="frames"
+      >
+        <MediaPool
           v-model="workStore.selectedFrameGroups"
-          tag="div"
-          @change="onDragChange"
-        >
-          <template #item="{ element: frameGroup, index }">
-            <div class="relative aspect-video cursor-grab select-none" :data-driver="`frameGroup_${index}`">
-              <div
-                class="absolute top-0 left-0 grid size-9 place-content-center bg-neutral-600/60 text-lg font-bold text-white"
-              >
-                {{ index + 1 }}
-              </div>
-              <button
-                class="absolute top-0 right-0 grid size-9 cursor-pointer place-items-center bg-red-400/70 hover:bg-red-300/70"
-                @click="onDelFrameGroupClick(index)"
-              >
-                <icon-ic-baseline-clear class="size-7 text-white"></icon-ic-baseline-clear>
-              </button>
-              <div class="absolute bottom-0 left-0 w-full bg-white/80 text-center">
-                {{ frameGroup.start }} ~ {{ frameGroup.end }}
-              </div>
-              <img
-                draggable="false"
-                class="cursor-pointer"
-                @click="
-                  viewMode = 'edit';
-                  onImageClick(index);
-                "
-                :src="imageUrl(frameGroup.ep, frameGroup.start)"
-                :alt="`${frameGroup.ep} ${frameGroup.text}`"
-                :title="`Ep${frameGroup.ep} ${frameGroup.text}`"
-              />
-            </div>
-          </template>
-        </draggable>
-
-        <div
-          role="button"
-          class="bg-white py-1 text-center text-lg"
-          :class="{ 'font-bold text-red-400': workStore.outputFrames.length > maxFrames }"
-        >
-          {{ workStore.outputFrames.length }} / {{ maxFrames }}
-        </div>
-
-        <div class="grid grid-cols-2 text-lg">
-          <VDialog v-model="downloadDialogOpen" dialogClass="bg-white w-full max-w-[480px] max-h-full rounded-lg">
-            <template #content>
-              <div class="relative flex h-full flex-col items-center justify-center p-6">
-                <div class="mb-8 text-xl">匯出檔案</div>
-                <button
-                  class="absolute top-0 right-0 cursor-pointer p-3 hover:opacity-70"
-                  @click="downloadDialogOpen = false"
-                >
-                  <icon-ic-baseline-clear role="button" tabindex="1" class="size-7 text-gray-500 outline-none" />
-                </button>
-
-                <AnimeSpecSelector ref="animeSpecSelectorRef" class="mb-8 w-full" />
-
-                <button
-                  v-if="animeSpecSelectorRef"
-                  @click="onDownloadClick(animeSpecSelectorRef.selectedFormat, animeSpecSelectorRef.selectedResolution)"
-                  role="button"
-                  class="flex h-11 w-full items-center justify-center rounded text-white outline-none hover:opacity-80"
-                  :class="isDownloading ? 'pointer-events-none bg-neutral-400' : 'bg-mujica cursor-pointer'"
-                >
-                  <ImageLoadingIcon v-if="isDownloading" class="mt-0.5 mr-3 text-lg text-white" />
-                  {{ downloadBtnText }}
-                </button>
-              </div>
-            </template>
-          </VDialog>
-
-          <VDialog v-model="clearDialogOpen" dialogClass="bg-white w-full max-w-[480px] max-h-full rounded-lg">
-            <template #content>
-              <div class="relative flex h-full flex-col justify-center p-6">
-                <div class="mt-4 mb-10 text-xl">你確定要刪除所有編修中的素材麼？</div>
-                <div class="flex justify-center gap-x-4 text-white">
-                  <button
-                    @click="
-                      onClearAll();
-                      clearDialogOpen = false;
-                    "
-                    class="w-24 cursor-pointer rounded bg-red-600 py-2 transition-opacity hover:opacity-80"
-                  >
-                    刪除
-                  </button>
-                  <button
-                    @click="clearDialogOpen = false"
-                    class="w-24 cursor-pointer rounded bg-neutral-600 transition-opacity hover:opacity-80"
-                  >
-                    取消
-                  </button>
-                </div>
-              </div>
-            </template>
-          </VDialog>
-        </div>
+          @delete="onDelFrameGroupClick"
+          @item-click="onImageClick"
+          @drag-change="onDragChange"
+        />
       </div>
+
+      <VDialog v-model="downloadDialogOpen" dialogClass="bg-white w-full max-w-[480px] max-h-full rounded-lg">
+        <template #content>
+          <div class="relative flex h-full flex-col items-center justify-center p-6">
+            <div class="mb-8 text-xl">匯出檔案</div>
+            <button
+              class="absolute top-0 right-0 cursor-pointer p-3 hover:opacity-70"
+              @click="downloadDialogOpen = false"
+            >
+              <icon-ic-baseline-clear role="button" tabindex="1" class="size-7 text-gray-500 outline-none" />
+            </button>
+
+            <AnimeSpecSelector ref="animeSpecSelectorRef" class="mb-8 w-full" />
+
+            <button
+              v-if="animeSpecSelectorRef"
+              @click="onDownloadClick(animeSpecSelectorRef.selectedFormat, animeSpecSelectorRef.selectedResolution)"
+              role="button"
+              class="flex h-11 w-full items-center justify-center rounded text-white outline-none hover:opacity-80"
+              :class="isDownloading ? 'pointer-events-none bg-neutral-400' : 'bg-mujica cursor-pointer'"
+            >
+              <ImageLoadingIcon v-if="isDownloading" class="mt-0.5 mr-3 text-lg text-white" />
+              {{ downloadBtnText }}
+            </button>
+          </div>
+        </template>
+      </VDialog>
+
+      <VDialog v-model="clearDialogOpen" dialogClass="bg-white w-full max-w-[480px] max-h-full rounded-lg">
+        <template #content>
+          <div class="relative flex h-full flex-col justify-center p-6">
+            <div class="mt-4 mb-10 text-xl">你確定要刪除所有編修中的素材麼？</div>
+            <div class="flex justify-center gap-x-4 text-white">
+              <button
+                @click="
+                  onClearAll();
+                  clearDialogOpen = false;
+                "
+                class="w-24 cursor-pointer rounded bg-red-600 py-2 transition-opacity hover:opacity-80"
+              >
+                刪除
+              </button>
+              <button
+                @click="clearDialogOpen = false"
+                class="w-24 cursor-pointer rounded bg-neutral-600 transition-opacity hover:opacity-80"
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        </template>
+      </VDialog>
 
       <div class="flex min-h-0 grow flex-col bg-neutral-700">
         <div class="relative flex-1 overflow-hidden bg-neutral-500" data-driver="previewMode">
@@ -214,12 +197,13 @@
           </div>
         </div>
 
-        <div class="flex h-20 w-full shrink-0 items-center px-5 md:px-10" data-driver="controlBar">
+        <div class="flex h-16 w-full shrink-0 items-center pr-3 pl-6 lg:h-20 lg:px-10" data-driver="controlBar">
           <RangeSlider
             v-if="viewMode === 'edit'"
             :min="minmax.min"
             :max="minmax.max"
             v-model="slideValue"
+            :class="{ 'pointer-events-none opacity-30': !canControl }"
             @update:modelValue="debouncedSliderUpdate"
             @handle-active="onHandleActive"
           ></RangeSlider>
@@ -228,6 +212,7 @@
             ref="playSliderRef"
             :max-index="workStore.outputFrames.length ? workStore.outputFrames.length - 1 : 0"
             :isLoading="workStore.isLoadingImages"
+            :class="{ 'pointer-events-none opacity-30': !canControl }"
             @update:current-index="(currentIndex) => (playSlideIndex = currentIndex)"
           />
 
@@ -235,7 +220,7 @@
             @click="onControlClick"
             class="ml-6 cursor-pointer rounded-full bg-gray-500 p-1.5"
             :class="{
-              'pointer-events-none opacity-40': workStore.outputFrames.length > maxFrames || workStore.isLoadingImages,
+              'pointer-events-none opacity-40': workStore.outputFrames.length > maxFrames || !canControl,
             }"
             data-driver="playBtn"
           >
@@ -255,11 +240,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, nextTick, onActivated } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDebounceFn } from '@vueuse/core';
-import draggable from 'vuedraggable';
 import { useWorkStore } from '@/store/work';
+import { useBreakpointStore } from '@/store/breakpoint';
 import { klona } from 'klona/json';
 import pLimit from 'p-limit';
 import { driver } from 'driver.js';
@@ -273,8 +258,11 @@ import RangeSlider from '@/components/RangeSlider.vue';
 import PlaySlider from '@/components/PlaySlider.vue';
 import AnimeSpecSelector from '@/components/AnimeSpecSelector.vue';
 import ImageLoadingIcon from '@/components/ImageLoadingIcon.vue';
+import VDrawer from '@/components/VDrawer.vue';
+import MediaPool from '@/components/MediaPool.vue';
 
 const workStore = useWorkStore();
+const breakpointStore = useBreakpointStore();
 const router = useRouter();
 
 const slideValue = ref<[number, number]>([0, 0]);
@@ -285,6 +273,7 @@ const playSliderRef = ref<InstanceType<typeof PlaySlider> | null>(null);
 const downloadDialogOpen = ref(false);
 const clearDialogOpen = ref(false);
 const animeSpecSelectorRef = ref<InstanceType<typeof AnimeSpecSelector>>();
+const isDrawerOpen = ref(false);
 
 const selectedFrameGroup = computed(() => {
   if (typeof selectedFrameGroupIndex.value !== 'number') return undefined;
@@ -310,6 +299,9 @@ const downloadBtnText = computed(() => {
 const isDownloading = computed(() => {
   return workStore.isLoadingImages || isRenderingAnime.value;
 });
+const canControl = computed(() => {
+  return !workStore.isLoadingImages && workStore.selectedFrameGroups.length;
+});
 
 function onDelFrameGroupClick(index: number) {
   if (index >= 0 && index < workStore.selectedFrameGroups.length) {
@@ -327,6 +319,7 @@ function onDelFrameGroupClick(index: number) {
 
 function onImageClick(index: number) {
   selectedFrameGroupIndex.value = index;
+  viewMode.value = 'edit';
   if (selectedFrameGroup.value) {
     slideValue.value = [selectedFrameGroup.value.start, selectedFrameGroup.value.end];
   }
@@ -479,6 +472,7 @@ async function onControlClick() {
   const currentSnapshot = klona(workStore.selectedFrameGroups);
   if (JSON.stringify(currentSnapshot) !== JSON.stringify(lastFrameGroupsSnapshot.value)) {
     lastFrameGroupsSnapshot.value = klona(workStore.selectedFrameGroups);
+    playSliderRef.value.reset();
     await loadImages();
   }
 
@@ -490,7 +484,16 @@ function onBackClick() {
   viewMode.value = 'edit';
 }
 
+const exampleFrameGroup = {
+  ep: 1,
+  start: 23465,
+  end: 23513,
+  text: '拿到門票了,真是奇蹟',
+  id: '1-23465-23513',
+  addTime: Date.now().toString(),
+};
 function startDriver() {
+  if (!breakpointStore.isGreaterThanBreakpoint) isDrawerOpen.value = true;
   const animeDriver = driver({
     popoverClass: 'driverjs-theme',
     showProgress: true,
@@ -506,16 +509,8 @@ function startDriver() {
           onNextClick: async () => {
             // 如果素材箱為空就加入範例素材
             if (workStore.selectedFrameGroups.length === 0) {
-              workStore.selectedFrameGroups = [
-                {
-                  ep: 1,
-                  start: 23465,
-                  end: 23513,
-                  text: '拿到門票了,真是奇蹟',
-                  id: '1-23465-23513',
-                  addTime: Date.now().toString(),
-                },
-              ];
+              workStore.originFrameGroupMap.set(exampleFrameGroup.id, { ...exampleFrameGroup });
+              workStore.selectedFrameGroups = [exampleFrameGroup];
             }
             await nextTick();
             animeDriver.moveNext();
@@ -526,8 +521,9 @@ function startDriver() {
         element: '[data-driver="frameGroup_0"]',
         popover: {
           title: '排列與選定素材',
-          description: '拖動素材可以改變排列順序，點擊素材可以選定素材',
+          description: `拖動素材${!breakpointStore.isGreaterThanBreakpoint ? '號碼' : '圖片'}可以改變排列順序，點擊素材可以選定素材`,
           onNextClick: async () => {
+            isDrawerOpen.value = false;
             onImageClick(0);
             await nextTick();
             animeDriver.moveNext();
@@ -536,7 +532,15 @@ function startDriver() {
       },
       {
         element: '[data-driver="previewMode"]',
-        popover: { title: '瀏覽選定素材', description: '點擊素材後，可以瀏覽與編輯，真是奇蹟！' },
+        popover: {
+          title: '瀏覽選定素材',
+          description: '點擊素材後，可以瀏覽與編輯，真是奇蹟！',
+          onPrevClick: async () => {
+            isDrawerOpen.value = true;
+            await nextTick();
+            animeDriver.movePrevious();
+          },
+        },
       },
       {
         element: '[data-driver="viewMode"]',
@@ -560,6 +564,7 @@ function startDriver() {
       },
     ],
     onDestroyed() {
+      isDrawerOpen.value = false;
       isDriverActive.value = false;
     },
   });
@@ -569,6 +574,10 @@ function startDriver() {
 }
 
 const isDriverActive = ref(false);
+
+onActivated(() => {
+  if (typeof selectedFrameGroupIndex.value !== 'number' && workStore.selectedFrameGroups.length) onImageClick(0);
+});
 </script>
 
 <style scoped>
